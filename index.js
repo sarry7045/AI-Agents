@@ -1,6 +1,6 @@
 import OpenAI from "openai";
 import readlineSync from "readline-sync";
-import 'dotenv/config';
+import "dotenv/config";
 // require("dotenv").config()
 // import { configDotenv } from "dotenv";
 
@@ -40,59 +40,59 @@ START
 
 `;
 
-async function chatAI() {
-  const result = await client.chat.completions.create({
-    // model: "gpt-4o",
-    model: "deepseek/deepseek-r1:free",
-    messages: [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: userPrompt },
-      {
-        role: "developer",
-        content: `{"type": "plan", "plan": "I Will call the getWeather for Mumbai"}`,
-      },
-    ],
-  }).then((e) => {
-    // console.log(e.choices[0].message.content);
-    console.log(e);
-  });
-  console.log(result);
-}
-chatAI();
-
-
-
-
-// const messages = [{ role: "system", content: systemPrompt }];
-
-// while (true) {
-//   const query = readlineSync.question(">>");
-//   const q = {
-//     type: "user",
-//     user: query,
-//   };
-//   messages.push({ role: "user", content: JSON.stringify(q) });
-
-//   while (true) {
-//     const chat = await client.chat.completions.create({
-//       // model: "gpt-4o",
-//       model: "deepseek/deepseek-r1:free",
-//       // model: "deepseek-chat",
-//       messages: messages,
-//       response_format: { type: "json_object" },
-//     });
-//     const result = chat.choices[0].message.content;
-//     messages.push({ role: "assistant", content: result });
-
-//     const call = JSON.parse(result);
-//     if (call.type === "output") {
-//       console.log(`Bot: ${call.output}`);
-//       break;
-//     } else if (call.type === "action") {
-//       const fn = tools[call.function];
-//       const observation = fn(call.input);
-//       const obs = { type: "observation", observation: observation };
-//       messages.push({ role: "developer", content: JSON.stringify(obs) });
-//     }
-//   }
+// async function chatAI() {
+//   const result = await client.chat.completions.create({
+//     // model: "gpt-4o",
+//     model: "deepseek/deepseek-r1:free",
+//     messages: [
+//       { role: "system", content: systemPrompt },
+//       { role: "user", content: userPrompt },
+//       {
+//         role: "developer",
+//         content: `{"type": "plan", "plan": "I Will call the getWeather for Mumbai"}`,
+//       },
+//     ],
+//   }).then((e) => {
+//     // console.log(e.choices[0].message.content);
+//     console.log(e);
+//   });
+//   console.log(result);
 // }
+// chatAI();
+
+
+
+
+const messages = [{ role: "system", content: systemPrompt }];
+
+while (true) {
+  const query = readlineSync.question(">>");
+  const q = {
+    type: "user",
+    user: query,
+  };
+  messages.push({ role: "user", content: JSON.stringify(q) });
+
+  while (true) {
+    const chat = await client.chat.completions.create({
+      // model: "gpt-4o",
+      model: "deepseek/deepseek-r1:free",
+      // model: "deepseek-chat",
+      messages: messages,
+      response_format: { type: "json_object" },
+    });
+    const result = chat.choices[0].message.content;
+    messages.push({ role: "assistant", content: result });
+
+    const call = JSON.parse(result);
+    if (call.type === "output") {
+      console.log(`Bot: ${call.output}`);
+      break;
+    } else if (call.type === "action") {
+      const fn = tools[call.function];
+      const observation = fn(call.input);
+      const obs = { type: "observation", observation: observation };
+      messages.push({ role: "developer", content: JSON.stringify(obs) });
+    }
+  }
+}
