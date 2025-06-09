@@ -60,7 +60,7 @@ app.post("/chat", async (req, res) => {
     for await (const chunk of deepThinkingOutput) {
       res.write(`event: deep-thinking\data: ${JSON.stringify({ chunk })}\n\n`);
     }
-    
+
     const finalResponseOutPut = await finalResponseChain.stream({
       query,
       analysis,
@@ -72,7 +72,6 @@ app.post("/chat", async (req, res) => {
   } catch (error) {}
   a;
 });
-
 
 app.listen(3000, () => {
   console.log("Server is Running on 3000");

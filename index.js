@@ -60,9 +60,6 @@ START
 // }
 // chatAI();
 
-
-
-
 const messages = [{ role: "system", content: systemPrompt }];
 
 while (true) {
