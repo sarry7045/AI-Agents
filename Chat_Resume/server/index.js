@@ -7,7 +7,7 @@ import { QdrantVectorStore } from "@langchain/qdrant";
 import OpenAI from "openai";
 
 const client = new OpenAI({
-  apiKey: "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",
+  apiKey: "",
 });
 
 const queue = new Queue("file-upload-queue", {
