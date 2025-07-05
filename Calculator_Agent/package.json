@@ -1,0 +1,19 @@
+{
+  "name": "calculator_agent",
+  "version": "1.0.0",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@langchain/core": "^0.3.61",
+    "@langchain/langgraph": "^0.3.5",
+    "@langchain/openai": "^0.5.15",
+    "dotenv": "^16.5.0",
+    "zod": "^3.25.67"
+  }
+}

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF‑8" />
+    <title>Niko – AI Web‑Dev Teacher</title>
+    <style>
+      body {
+        font: 16px/1.4 system-ui, sans-serif;
+        padding: 2rem;
+      }
+      #log {
+        white-space: pre-wrap;
+        margin-top: 1rem;
+      }
+      button {
+        font-size: 1.2rem;
+        padding: 0.6rem 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <button id="talkBtn">🎤 Talk to Niko</button>
+    <div id="log"></div>
+    <audio id="audio"></audio>
+
+    <script type="module">
+      const GEMINI_KEY = "AIzaSyBkB62hiRbPtGh_No5tUVMQ_K43oMF6I94";
+      const OPENAI_KEY =
+        "";
+      const log = (...args) =>
+        (document.getElementById("log").textContent += args.join(" ") + "\n");
+      const $audio = document.getElementById("audio");
+
+      // Speech‑to‑text
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SpeechRecognition) {
+        log("❌ This browser does not support Web Speech API.");
+        throw new Error("SpeechRecognition unsupported");
+      }
+
+      const recognizer = new SpeechRecognition();
+      recognizer.continuous = false;
+      recognizer.interimResults = false;
+      recognizer.lang = "en-US";
+      recognizer.maxAlternatives = 1;
+
+      document.getElementById("talkBtn").addEventListener("click", () => {
+        recognizer.start();
+      });
+
+      recognizer.onstart = () => log("🎙️  Listening …");
+      recognizer.onerror = (e) => log("⚠️  Speech error:", e.error);
+      recognizer.onresult = async (e) => {
+        const transcript = e.results[0][0].transcript;
+        log(`🗣️ You said: “${transcript}”`);
+
+        try {
+          const replyText = await askGemini(transcript);
+          log(`🤖 Niko: ${replyText}`);
+          await speakWithOpenAI(replyText);
+        } catch (err) {
+          log("❌ API error:", err.message);
+        }
+      };
+
+      function isWebDevRelated(text) {
+        const keywords = [
+          // General
+          "web development",
+          "website",
+          "web app",
+          "frontend",
+          "backend",
+          "fullstack",
+          "web application",
+          "ui",
+          "ux",
+          "user interface",
+          "user experience",
+          "web design",
+
+          // Frontend
+          "html",
+          "css",
+          "javascript",
+          "typescript",
+          "react",
+          "nextjs",
+          "vue",
+          "angular",
+          "svelte",
+          "jquery",
+          "tailwind",
+          "bootstrap",
+          "sass",
+          "scss",
+          "vite",
+          "parcel",
+          "webpack",
+          "babel",
+
+          // Backend
+          "node",
+          "nodejs",
+          "express",
+          "django",
+          "flask",
+          "laravel",
+          "php",
+          "ruby on rails",
+          "spring boot",
+          "java backend",
+          "api",
+          "rest api",
+          "graphql",
+          "server",
+          "serverless",
+          "microservices",
+
+          // Database
+          "mongodb",
+          "mysql",
+          "postgresql",
+          "sqlite",
+          "firebase",
+          "redis",
+          "database",
+          "db schema",
+          "sql",
+          "nosql",
+
+          // DevOps / Hosting
+          "git",
+          "github",
+          "gitlab",
+          "bitbucket",
+          "netlify",
+          "vercel",
+          "render",
+          "aws",
+          "azure",
+          "gcp",
+          "cloud",
+          "ci",
+          "cd",
+          "devops",
+          "docker",
+          "kubernetes",
+          "nginx",
+          "apache",
+          "heroku",
+          "ftp",
+
+          // Programming
+          "programming",
+          "coding",
+          "scripting",
+          "software development",
+          "functions",
+          "variables",
+          "loops",
+          "conditional",
+          "debugging",
+          "console",
+          "dom",
+          "event listener",
+
+          // Tools
+          "vs code",
+          "vscode",
+          "code editor",
+          "npm",
+          "yarn",
+          "pnpm",
+          "build tools",
+          "eslint",
+          "prettier",
+          "linter",
+          "formatter",
+          "package.json",
+
+          // Testing
+          "testing",
+          "unit test",
+          "jest",
+          "cypress",
+          "playwright",
+          "performance",
+          "lighthouse",
+          "web vitals",
+          "seo",
+          "core web vitals",
+
+          // Web Standards
+          "web api",
+          "localstorage",
+          "cookies",
+          "session",
+          "service worker",
+          "web socket",
+          "http",
+          "https",
+          "fetch",
+          "xhr",
+          "json",
+          "cors",
+          "auth",
+          "oauth",
+          "jwt",
+          "authentication",
+          "authorization",
+
+          // Mobile & Responsive
+          "responsive",
+          "media query",
+          "mobile first",
+          "pwa",
+          "progressive web app",
+
+          // Learning / Career
+          "how to learn",
+          "web dev roadmap",
+          "developer career",
+          "frontend vs backend",
+          "interview question",
+          "portfolio",
+          "freelance",
+          "coding project",
+        ];
+
+        const lower = text.toLowerCase();
+        return keywords.some((word) => lower.includes(word));
+      }
+
+      // Ask Gemini
+      async function askGemini(text) {
+        if (!isWebDevRelated(text)) {
+          return "Sorry, I can only help with web development topics. 😊 Ask me about frontend, HTML, CSS, JavaScript, React, etc.";
+        }
+        const body = {
+          system_instruction: {
+            parts: [
+              {
+                text: "You are an AI Web‑Development tutor named Niko. Speak concisely with a friendly tone and sprinkle light emotions.",
+              },
+            ],
+          },
+          contents: [{ parts: [{ text }] }],
+        };
+
+        const res = await fetch(
+          `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          }
+        );
+
+        const data = await res.json();
+        if (!data.candidates?.length)
+          throw new Error("Gemini returned no candidates");
+        return data.candidates[0].content.parts[0].text.trim();
+      }
+
+      // Text‑to‑speech with OpenAI
+      async function speakWithOpenAI(text) {
+        const res = await fetch("https://api.openai.com/v1/audio/speech", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${OPENAI_KEY}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            model: "tts-1",
+            input: text,
+            voice: "nova",
+            format: "mp3",
+          }),
+        });
+
+        if (!res.ok) throw new Error(`OpenAI HTTP ${res.status}`);
+        const blob = await res.blob();
+        $audio.src = URL.createObjectURL(blob);
+        await $audio.play();
+      }
+    </script>
+  </body>
+</html>
+
+<!-- Open Live Server to Run this Application -->

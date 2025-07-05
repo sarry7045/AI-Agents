@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AI Agent UI</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 0;
+      padding: 1rem;
+      background: #f9fafb;
+    }
+    h1 {
+      text-align: center;
+      color: #111827;
+    }
+    textarea {
+      width: 100%;
+      height: 120px;
+      margin-top: 1rem;
+      font-size: 1rem;
+      padding: 0.5rem;
+    }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+    .log-area {
+      margin-top: 2rem;
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      padding: 1rem;
+      max-height: 400px;
+      overflow-y: auto;
+      font-family: monospace;
+    }
+    .log-step {
+      margin-bottom: 0.75rem;
+    }
+    .step-label {
+      font-weight: bold;
+      color: #4f46e5;
+      text-transform: uppercase;
+      margin-right: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>AI Agent UI</h1>
+  <textarea id="queryInput" placeholder="Enter your query here..."></textarea>
+  <div class="controls">
+    <button onclick="runAgent()">Run</button>
+    <button onclick="stopAgent()">Stop</button>
+    <button onclick="clearLogs()">Clear</button>
+  </div>
+  <div class="log-area" id="logArea"></div>
+
+  <script>
+    let controller = null;
+
+    function logStep(step, content) {
+      const logArea = document.getElementById('logArea');
+      const div = document.createElement('div');
+      div.className = 'log-step';
+      div.innerHTML = `<span class="step-label">${step}</span>${content}`;
+      logArea.appendChild(div);
+      logArea.scrollTop = logArea.scrollHeight;
+    }
+
+    function clearLogs() {
+      document.getElementById('logArea').innerHTML = '';
+    }
+
+    function stopAgent() {
+      if (controller) {
+        controller.abort();
+        logStep('stopped', 'Request aborted by user.');
+      }
+    }
+
+    async function runAgent() {
+      const input = document.getElementById('queryInput').value.trim();
+      if (!input) return;
+      clearLogs();
+      controller = new AbortController();
+
+      try {
+        const res = await fetch('/api/agent', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ query: input }),
+          signal: controller.signal
+        });
+
+        if (!res.body) throw new Error('No stream body returned');
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          const lines = chunk.split('\\n').filter(Boolean);
+
+          for (const line of lines) {
+            try {
+              const parsed = JSON.parse(line.trim());
+              if (parsed.step && parsed.content) {
+                logStep(parsed.step, parsed.content);
+              }
+            } catch {
+              logStep('error', 'Invalid JSON: ' + line);
+            }
+          }
+        }
+      } catch (err) {
+        logStep('error', err.message);
+      }
+    }
+  </script>
+</body>
+</html>
