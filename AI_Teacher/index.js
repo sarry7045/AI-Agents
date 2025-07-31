@@ -36,7 +36,7 @@ if (!SpeechRecognition) {
         },
       ],
     };
-    const API_KEY = "AIzaSyBkB62hiRbPtGh_No5tUVMQ_K43oMF6I94";
+    const API_KEY = "";
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
       {

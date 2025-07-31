@@ -1,0 +1,12 @@
+docker ps - for Check Docker Containers
+docker stop conatainer_id or conatainer_name
+
+Types Questions: 
+Which 3 Artist have the most albums ?
+how many artist are there ?
+which 3 artist have the most album ?
+which artist names correspond to these ids ?
+which artist has the most tracks ?
+which one is second ?
+
+Try with diffrent diffrent Model

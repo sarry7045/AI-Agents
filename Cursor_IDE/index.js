@@ -88,9 +88,10 @@ Example formats for different steps:
 
 async function init() {
   const messages = [{ role: "system", content: SYSTEM_PROMPT }];
-  // const userQuery = "Create a folder todo-app and create a todo app with HTML CSS and JS fully working";
+  // const userQuery = "Create a folder weather-app and create a weather app with HTML CSS and JS fully working with third party api";
+  const userQuery = "Create a folder todo-app and create a todo app with HTML CSS and JS fully working";
   // const userQuery = "What is the Weather of Mumbai ?";
-  const userQuery = "Tell me about India ?";
+  // const userQuery = "Tell me about India ?";
   messages.push({ role: "user", content: userQuery });
 
   while (true) {

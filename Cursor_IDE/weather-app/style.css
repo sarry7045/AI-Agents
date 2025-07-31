@@ -1,0 +1,7 @@
+body { font-family: Arial, sans-serif; background: #eef2f3; margin: 0; padding: 0; }
+.container { max-width: 400px; margin: 80px auto; background: #fff; padding: 2rem; border-radius: 10px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+h1 { text-align: center; color: #222; }
+#cityInput { width: 100%; padding: 10px; margin-bottom: 1rem; border: 1px solid #ddd; border-radius: 4px; }
+button { width: 100%; background: #34ace0; color: #fff; border: none; padding: 10px; border-radius: 4px; font-size: 16px; cursor: pointer; transition: background .2s; }
+button:hover { background: #227093; }
+#weatherResult { margin-top: 1.5rem; text-align: center; padding: 1rem; background: #f1f1f1; border-radius: 4px; font-size: 18px; min-height: 40px; }
